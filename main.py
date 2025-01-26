@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, send_from_directory
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 from sqlalchemy.schema import UniqueConstraint
@@ -11,6 +11,9 @@ import os
 # flask setuo
 app = Flask(__name__)
 socketio = SocketIO(app)
+
+ROOM = "derbyrace"
+NAMESPACE = "/"
 
 # sqlite setup
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///race_results.db'
@@ -57,8 +60,8 @@ def post_results():
         except Exception as e:
             db.session.rollback()
             return jsonify({'status': 'error', 'message': str(e)}), 500
-    # send to clients
-    socketio.emit('new_results', results)
+    # send to all ROOM clients
+    emit('new_results', results, room=ROOM, namespace=NAMESPACE)
     return jsonify({'status': 'success'}), 201
 
 # API endpoint
@@ -67,7 +70,8 @@ def reset_results():
     global results, current_race_id
     results = {}
     current_race_id += 1
-    socketio.emit('reset_results')
+    # send to all ROOM clients
+    emit('reset_results', room=ROOM, namespace=NAMESPACE)
     return jsonify({'status': 'results reset'}), 200
 
 # html view
@@ -126,6 +130,7 @@ def view_single_result(race_id):
 
 @socketio.on('connect')
 def test_connect():
+    join_room(ROOM)
     print('Client connected')
 
 @socketio.on('disconnect')
@@ -133,4 +138,4 @@ def test_disconnect():
     print('Client disconnected')
 
 if __name__ == '__main__':
-    socketio.run(app, host="0.0.0.0", debug=False)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=False)
