@@ -1,0 +1,5 @@
+flask
+flask-socketio
+sqlalchemy
+flask_sqlalchemy
+gunicorn
