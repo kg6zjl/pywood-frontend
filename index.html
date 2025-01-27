@@ -3,100 +3,9 @@
 <head>
     <title>Pinewood Derby Results</title>
     <link rel="icon" href="static/favicon.ico">
+    <link rel="stylesheet" href="static/styles.css">
     <!-- Use local socket.io because we don't have internet access -->
     <script src="static/socket.io.js"></script>
-    <style>
-        body {
-            background-color: black;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            font-size: 2em;
-            text-align: center;
-            position: relative;
-        }
-        .content {
-            width: 80%;
-            max-width: 800px;
-        }
-        table {
-            width: 80%;
-            margin: 0 auto;
-            table-layout: fixed;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 0.5em;
-            border: none;
-        }
-        th {
-            text-align: center;
-        }
-        td {
-            text-align: center;
-        }
-        table#previous-results th, table#previous-results td {
-            border-bottom: 1px solid white;
-        }
-        table#race-details th, table#race-details td {
-            border-bottom: 1px solid white;
-        }
-        table#race-details {
-            width: 50%;
-        }
-        span {
-            font-weight: bold;
-        }
-        .light-mode {
-            background-color: white;
-            color: black;
-        }
-        .toggle-button {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-        }
-        #results-container {
-            display: none;
-            overflow-y: auto;
-            max-height: 60vh;
-            width: 80%;
-            margin: 20px auto;
-            border: 1px solid white;
-            padding: 10px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-        }
-        #race-details-container {
-            display: none;
-        }
-        .navbar {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 5px 0;
-        }
-        .nav-button {
-            margin: 0 5px;
-            padding: 5px 10px;
-            font-size: 0.5em;
-        }
-        .light-mode .navbar {
-            background-color: rgba(255, 255, 255, 0.7); /* Light background */
-        }
-
-        .light-mode .nav-button {
-            background-color: #dadada; /* Dark gray button background */
-            color: rgb(0, 0, 0); /* White text color */
-        }
-    </style>
 </head>
 <body>
     <div class="content" id="race-view">
@@ -121,6 +30,9 @@
                 </tr>
             </tbody>
         </table>
+        <div id="ready-banner" style="visibility: hidden;">
+            <h1>READY TO RACE!</h1>
+        </div>
     </div>
 
     <div id="results-header" style="display: none;">
@@ -166,150 +78,6 @@
         <button id="mode-toggle" class="nav-button">Light Mode</button>
     </div>
 
-    <script>
-        try {
-            var socket = io();
-            console.log('Socket.io loaded successfully');
-        } catch (e) {
-            console.error('Failed to load Socket.io:', e);
-        }
-        var isDarkMode = true;
-
-        document.getElementById('mode-toggle').addEventListener('click', function() {
-            isDarkMode = !isDarkMode;
-            if (isDarkMode) {
-                document.body.classList.remove('light-mode');
-                document.querySelector('.navbar').classList.remove('light-mode');
-                document.querySelectorAll('.nav-button').forEach(button => button.classList.remove('light-mode'));
-                this.textContent = 'Light Mode';
-            } else {
-                document.body.classList.add('light-mode');
-                document.querySelector('.navbar').classList.add('light-mode');
-                document.querySelectorAll('.nav-button').forEach(button => button.classList.add('light-mode'));
-                this.textContent = 'Dark Mode';
-            }
-        });
-
-
-        socket.on('connect', function() {
-            console.log('Connected to WebSocket');
-        });
-
-        socket.on('new_results', function(data) {
-            for (var position in data) {
-                var lane = data[position];
-                if (position === "first") {
-                    document.getElementById('first').textContent = `Lane ${lane}`;
-                } else if (position === "second") {
-                    document.getElementById('second').textContent = `Lane ${lane}`;
-                } else if (position === "third") {
-                    document.getElementById('third').textContent = `Lane ${lane}`;
-                } else if (position === "fourth") {
-                    document.getElementById('fourth').textContent = `Lane ${lane}`;
-                }
-            }
-        });
-
-        socket.on('reset_results', function() {
-            document.getElementById('first').textContent = '';
-            document.getElementById('second').textContent = '';
-            document.getElementById('third').textContent = '';
-            document.getElementById('fourth').textContent = '';
-        });
-
-        socket.on('disconnect', function() {
-            console.log('Disconnected from WebSocket');
-        });
-
-        // this is all results
-        function viewResults() {
-            document.getElementById('view-results-button').style.display = 'none';
-            document.getElementById('back-to-race-view-button').style.display = 'inline-block';
-            
-            document.getElementById('results-header').style.display = 'block';
-            fetch('/results')
-                .then(response => response.json())
-                .then(data => {
-                    const resultsTable = document.getElementById('results');
-                    resultsTable.innerHTML = '';  // Clear previous results
-                    data.forEach(result => {
-                        const row = document.createElement('tr');
-                        const first = result.first ? `Lane ${result.first}` : "---";
-                        const second = result.second ? `Lane ${result.second}` : "---";
-                        const third = result.third ? `Lane ${result.third}` : "---";
-                        const fourth = result.fourth ? `Lane ${result.fourth}` : "---";
-                        
-                        row.innerHTML = `
-                            <td class="race-id" onclick="viewRaceDetails(${result.id})">${result.id}</td>
-                            <td>${first}</td>
-                            <td>${second}</td>
-                            <td>${third}</td>
-                            <td>${fourth}</td>
-                        `;
-                        resultsTable.appendChild(row);
-                    });
-                    document.getElementById('race-view').style.display = 'none';
-                    document.getElementById('results-container').style.display = 'block';
-                });
-        }
-
-        // this is the view for a single race
-        function viewRaceDetails(raceId) {
-            fetch(`/results/${raceId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        console.error('Error:', data.error);
-                        return;
-                    }
-
-                    console.log('Race data:', data);  // Add this line to inspect the data
-                    
-                    document.getElementById('race-id').textContent = `Race ID: ${data.id}`;
-                    document.getElementById('race-date').textContent = `Date: ${new Date(data.date).toLocaleString()}`;
-                    
-                    const raceDetailsBody = document.getElementById('race-details-body');
-                    raceDetailsBody.innerHTML = '';  // Clear previous race details
-
-                    const positions = ['first', 'second', 'third', 'fourth'];
-                    positions.forEach(position => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${capitalizeFirstLetter(position)}</td>
-                            <td>${data[position] ? `Lane ${data[position]}` : "---"}</td>
-                        `;
-                        raceDetailsBody.appendChild(row);
-                    });
-                    
-                    document.getElementById('results-container').style.display = 'none';
-                    document.getElementById('race-details-container').style.display = 'block';
-                    document.getElementById('results-header').style.display = 'none';
-                    document.getElementById('back-to-results-button').style.display = 'inline-block';
-                    document.getElementById('back-to-race-view-button').style.display = 'inline-block';
-                })
-                .catch(error => console.error('Error fetching race details:', error));
-        }
-
-        function capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
-        }
-
-        function goRaceView() {
-            document.getElementById('view-results-button').style.display = 'inline-block';
-            document.getElementById('back-to-race-view-button').style.display = 'none';    
-            document.getElementById('results-header').style.display = 'none';
-            document.getElementById('results-container').style.display = 'none';
-            document.getElementById('race-view').style.display = 'block';
-            document.getElementById('race-details-container').style.display = 'none';
-        }
-
-        function goBackToResults() {
-            document.getElementById('race-details-container').style.display = 'none';
-            document.getElementById('results-container').style.display = 'block';
-            document.getElementById('results-header').style.display = 'block';  // Show previous results header
-            document.getElementById('back-to-results-button').style.display = 'none';  // Hide back to results button
-            document.getElementById('back-to-race-view-button').style.display = 'inline-block';  // Show back to race view button
-        }
-    </script>
+    <script src="static/script.js"></script>
 </body>
 </html>
