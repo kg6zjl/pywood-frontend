@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pinewood Derby Results</title>
+    <link rel="icon" href="static/favicon.ico">
+    <link rel="stylesheet" href="static/styles.css">
+    <!-- Use local socket.io because we don't have internet access -->
+    <script src="static/socket.io.js"></script>
+</head>
+<body>
+    <div class="content" id="race-view">
+        <h1>Pinewood Derby<br>Race Results</h1>
+        <table>
+            <tbody>
+                <tr>
+                    <td>FIRST</td>
+                    <td><span id="first"></span></td>
+                </tr>
+                <tr>
+                    <td>SECOND</td>
+                    <td><span id="second"></span></td>
+                </tr>
+                <tr>
+                    <td>THIRD</td>
+                    <td><span id="third"></span></td>
+                </tr>
+                <tr>
+                    <td>FOURTH</td>
+                    <td><span id="fourth"></span></td>
+                </tr>
+            </tbody>
+        </table>
+        <div id="ready-banner" style="visibility: hidden;">
+            <h1>READY TO RACE!</h1>
+        </div>
+    </div>
+
+    <div id="results-header" style="display: none;">
+        <h1>Previous Race<br>Results</h1>
+    </div>
+
+    <div id="results-container">
+        <table id="previous-results">
+            <thead>
+                <tr>
+                    <th>Race ID</th>
+                    <th>First</th>
+                    <th>Second</th>
+                    <th>Third</th>
+                    <th>Fourth</th>
+                </tr>
+            </thead>
+            <tbody id="results">
+            </tbody>
+        </table>
+    </div>
+
+    <div id="race-details-container" style="display: none;">
+        <h1>Race Details</h1>
+        <p id="race-id"></p>
+        <p id="race-date"></p>
+        <table id="race-details">
+            <thead>
+                <tr>
+                    <th>Position</th>
+                    <th>Lane</th>
+                </tr>
+            </thead>
+            <tbody id="race-details-body">
+            </tbody>
+        </table>
+    </div>    
+
+    <div class="navbar">
+        <button id="view-results-button" class="nav-button" onclick="viewResults()">View All Results</button>
+        <button id="back-to-race-view-button" class="nav-button" onclick="goRaceView()" style="display: none;">Back to Race View</button>
+        <button id="back-to-results-button" class="nav-button" onclick="goBackToResults()" style="display: none;">Back to Results</button>
+        <button id="mode-toggle" class="nav-button">Light Mode</button>
+    </div>
+
+    <script src="static/script.js"></script>
+</body>
+</html>

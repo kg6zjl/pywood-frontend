@@ -6,19 +6,40 @@ from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime, timezone
 from datetime import datetime
+import logging
+from logging.handlers import RotatingFileHandler
 import os
 
 # flask setuo
 app = Flask(__name__)
 socketio = SocketIO(app)
 
+# websocket bradcast settings
 ROOM = "derbyrace"
 NAMESPACE = "/"
+
+# Configure logging to file with rotation
+file_handler = RotatingFileHandler('logs/app.log', maxBytes=50000, backupCount=1)
+file_handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
+file_handler.setFormatter(formatter)
+app.logger.addHandler(file_handler)
+
+# send app logs to app logger
+app.logger.addHandler(file_handler)
+app.logger.setLevel(logging.DEBUG)
+
+# send flask logs to app logger
+werkzeug_logger = logging.getLogger('werkzeug')
+werkzeug_logger.addHandler(file_handler)
+werkzeug_logger.setLevel(logging.DEBUG)
 
 # sqlite setup
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///race_results.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+# define our db schema
 class RaceResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     race_id = db.Column(db.Integer, nullable=False)
@@ -72,12 +93,13 @@ def reset_results():
     current_race_id += 1
     # send to all ROOM clients
     emit('reset_results', room=ROOM, namespace=NAMESPACE)
+    app.logger.info(f"RESET - Next Race ID: { current_race_id }")
     return jsonify({'status': 'results reset'}), 200
 
 # html view
 @app.route('/')
 def serve_html():
-    return send_from_directory(os.getcwd(), 'index.html')
+    return send_from_directory(os.getcwd(), 'static/index.html')
 
 @app.route('/static/<path:path>')
 def static_proxy(path):
@@ -131,11 +153,11 @@ def view_single_result(race_id):
 @socketio.on('connect')
 def test_connect():
     join_room(ROOM)
-    print('Client connected')
+    app.logger.info('Client connected')
 
 @socketio.on('disconnect')
 def test_disconnect():
-    print('Client disconnected')
+    app.logger.info('Client disconnected')
 
 if __name__ == '__main__':
     socketio.run(app, host="0.0.0.0", port=5000, debug=False)

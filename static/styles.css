@@ -1,0 +1,112 @@
+body {
+    background-color: black;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    font-size: 2em;
+    text-align: center;
+    position: relative;
+}
+.content {
+    width: 80%;
+    max-width: 800px;
+}
+table {
+    width: 80%;
+    margin: 0 auto;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 0.5em;
+    border: none;
+}
+th {
+    text-align: center;
+}
+td {
+    text-align: center;
+}
+table#previous-results th, table#previous-results td {
+    border-bottom: 1px solid white;
+}
+table#race-details th, table#race-details td {
+    border-bottom: 1px solid white;
+}
+table#race-details {
+    width: 50%;
+}
+span {
+    font-weight: bold;
+}
+.light-mode {
+    background-color: white;
+    color: black;
+}
+.toggle-button {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}
+#results-container {
+    display: none;
+    overflow-y: auto;
+    max-height: 60vh;
+    width: 80%;
+    margin: 20px auto;
+    border: 1px solid white;
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+#race-details-container {
+    display: none;
+}
+.navbar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 5px 0;
+}
+.nav-button {
+    margin: 0 5px;
+    padding: 5px 10px;
+    font-size: 0.5em;
+}
+.light-mode .navbar {
+    background-color: rgba(255, 255, 255, 0.7); /* Light background */
+}
+
+.light-mode .nav-button {
+    background-color: #dadada; /* Dark gray button background */
+    color: rgb(0, 0, 0); /* White text color */
+}
+
+/* General styles for the banner */
+#ready-banner {
+    height: 140px; /* Adjust the height as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px; /* Adjust the font size as needed */
+    visibility: hidden; /* Start with the banner hidden */
+}
+
+/* Dark mode styles */
+body:not(.light-mode) #ready-banner {
+    background-color: #000000;
+    color: rgb(255, 255, 255);
+}
+
+/* Light mode styles */
+body.light-mode #ready-banner {
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+}

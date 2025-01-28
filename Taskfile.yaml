@@ -30,6 +30,7 @@ tasks:
   reset:
     cmds:
       - rm -rf instance/race_results.db
+      - rm -rf logs/*
   
   stop:
     cmds:
