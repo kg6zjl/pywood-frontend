@@ -153,3 +153,20 @@ function goBackToResults() {
     document.getElementById('back-to-results-button').style.display = 'none';  // Hide back to results button
     document.getElementById('back-to-race-view-button').style.display = 'inline-block';  // Show back to race view button
 }
+
+// trigger a server-side race reset
+function resetRace() {
+    const confirmReset = confirm('Reset race and clear current results?');
+    if (!confirmReset) return;
+    fetch('/api/v1/reset', { method: 'POST' })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('Failed to reset race');
+            }
+            console.log('Reset requested');
+        })
+        .catch(err => {
+            console.error('Reset error:', err);
+            alert('Failed to reset race. See console for details.');
+        });
+}
