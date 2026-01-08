@@ -12,7 +12,13 @@ import os
 
 # flask setuo
 app = Flask(__name__)
-socketio = SocketIO(app)
+# Configure Socket.IO with sane heartbeat timeouts so dead clients are cleaned up
+socketio = SocketIO(
+    app,
+    ping_timeout=20,      # seconds to wait for a pong before disconnecting
+    ping_interval=25,     # seconds between pings
+    cors_allowed_origins="*"
+)
 
 # websocket bradcast settings
 ROOM = "derbyrace"
@@ -46,6 +52,7 @@ class RaceResult(db.Model):
     date = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     lane = db.Column(db.String(50), nullable=False)
     position = db.Column(db.String(50), nullable=False)
+    time_microseconds = db.Column(db.BigInteger, nullable=False, default=0)
 
     # Add a unique constraint so we don't write dupe data
     __table_args__ = (
@@ -64,10 +71,12 @@ with app.app_context():
     current_race_id = initialize_race_id()
 
 results = {}
+active_clients = set()
 
 # API endpoint
 @app.route('/api/v1/results', methods=['POST'])
 def post_results():
+    global results
     data = request.json
     results = {position.lower(): str(lane) for position, lane in data.items()}
     for position, lane in data.items():
@@ -83,6 +92,7 @@ def post_results():
             return jsonify({'status': 'error', 'message': str(e)}), 500
     # send to all ROOM clients
     emit('new_results', results, room=ROOM, namespace=NAMESPACE)
+    app.logger.info(f"Results posted: {results}")
     return jsonify({'status': 'success'}), 201
 
 # API endpoint
@@ -152,12 +162,24 @@ def view_single_result(race_id):
 
 @socketio.on('connect')
 def test_connect():
+    # Track active client sessions by sid
+    try:
+        active_clients.add(request.sid)
+    except Exception:
+        pass
     join_room(ROOM)
-    app.logger.info('Client connected')
+    # Send current race state to new client immediately
+    if results:
+        emit('new_results', results)
+    app.logger.info(f"Client connected (active={len(active_clients)}), synced={bool(results)}")
 
 @socketio.on('disconnect')
 def test_disconnect():
-    app.logger.info('Client disconnected')
+    try:
+        active_clients.discard(request.sid)
+    except Exception:
+        pass
+    app.logger.info(f"Client disconnected (active={len(active_clients)})")
 
 if __name__ == '__main__':
     socketio.run(app, host="0.0.0.0", port=5000, debug=False)

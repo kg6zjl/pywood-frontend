@@ -3,3 +3,5 @@ flask-socketio
 sqlalchemy
 flask_sqlalchemy
 gunicorn
+python-socketio
+requests

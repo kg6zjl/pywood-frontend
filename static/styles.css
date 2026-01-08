@@ -1,3 +1,9 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
 body {
     background-color: black;
     color: white;
@@ -5,16 +11,25 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
     margin: 0;
     font-family: Arial, sans-serif;
     font-size: 2em;
     text-align: center;
     position: relative;
+    box-sizing: border-box;
 }
 .content {
-    width: 80%;
-    max-width: 800px;
+    width: 100%;
+    height: 100vh;
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    padding: 0;
+    padding-bottom: 50px;
+    box-sizing: border-box;
 }
 table {
     width: 80%;
@@ -43,6 +58,45 @@ table#race-details {
 }
 span {
     font-weight: bold;
+}
+
+/* Race display styles - projection optimized */
+#race-view {
+    width: 100% !important;
+    max-width: none !important;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#race-view h1 {
+    font-size: 8vmin;
+    margin: 2vh 0;
+    line-height: 1.1;
+}
+
+#race-view table {
+    width: 90%;
+    margin: 0 auto;
+    font-size: 10vmin;
+    flex: 1;
+    display: table;
+}
+
+#race-view tbody {
+    display: table-row-group;
+}
+
+#race-view tr {
+    height: 15vh;
+}
+
+#race-view td {
+    padding: 2vh 1vw;
+    line-height: 1.2;
+    vertical-align: middle;
 }
 .light-mode {
     background-color: white;
@@ -74,11 +128,17 @@ span {
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.7);
     padding: 5px 0;
+    z-index: 1000;
 }
 .nav-button {
     margin: 0 5px;
     padding: 5px 10px;
     font-size: 0.5em;
+    background-color: rgba(50, 50, 50, 0.9);
+    color: white;
+    border: 1px solid white;
+    cursor: pointer;
+    border-radius: 3px;
 }
 .light-mode .navbar {
     background-color: rgba(255, 255, 255, 0.7); /* Light background */
@@ -91,12 +151,24 @@ span {
 
 /* General styles for the banner */
 #ready-banner {
-    height: 140px; /* Adjust the height as needed */
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px; /* Adjust the font size as needed */
     visibility: hidden; /* Start with the banner hidden */
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+}
+
+#ready-banner h1 {
+    font-size: 12vmin;
+    margin: 0;
+    font-weight: bold;
+    color: #00ff00;
+    text-shadow: 0 0 20px #00ff00;
+    padding: 2vh;
 }
 
 /* Dark mode styles */

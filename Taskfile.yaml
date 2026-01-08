@@ -15,23 +15,26 @@ tasks:
     cmds:
       - python main.py
 
-  serve:
-    cmds:
-      - brew services start caddy || echo "Caddy already started"
-      - gunicorn -w 4 -b 127.0.0.1:5000 main:app
-      - caddy run --config Caddyfile
-
-
   results:
+    desc: Send test race results to API
     cmds:
-      - curl -XPOST http://127.0.0.1:5000/api/v1/reset
       - bash test_data.sh
   
+  test:
+    desc: Run multi-client WebSocket broadcast tests (requires dev server running)
+    cmds:
+      - python test_multilient.py
+  
+  test:full:
+    desc: Start dev server and run tests (opens test in new terminal)
+    cmds:
+      - task: dev
+        background: true
+      - sleep 3
+      - python test_multilient.py
+  
   reset:
+    desc: Clear database and logs
     cmds:
       - rm -rf instance/race_results.db
       - rm -rf logs/*
-  
-  stop:
-    cmds:
-      - caddy stop
